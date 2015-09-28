@@ -1,6 +1,7 @@
 /*---------------------------------------------
 
 右上の×ボタンを押すと、メッセージボックスで確認する
+マウスクリックをメッセージボックスで通知する
 
 -----------------------------------------------*/
 
@@ -11,8 +12,8 @@
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 // 大域変数
-static TCHAR szWindowClass[] = _T("Win32AP006");
-static TCHAR szTitle[] = _T("Win32AP006");
+static TCHAR szWindowClass[] = _T("Win32AP007");
+static TCHAR szTitle[] = _T("Win32AP007");
 HINSTANCE	hInst;
 
 int WINAPI WinMain(HINSTANCE hInstance,
@@ -82,7 +83,6 @@ int WINAPI WinMain(HINSTANCE hInstance,
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
 
-	//メッセージループ
 	MSG msg;
 	while (GetMessage(&msg, NULL, 0, 0)) {
 		TranslateMessage(&msg);
@@ -93,37 +93,29 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
 // ウィンドウプロシージャ
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
-	PAINTSTRUCT	ps;
-	HDC			hdc;
-	TCHAR		greeting[] = _T("Hello, World!");
-	int style = MB_YESNO;	//メッセージボックスのスタイル
-
 	switch (message) {
-	case WM_PAINT:
-		hdc = BeginPaint(hWnd, &ps);
-		TextOut(hdc,
-			5,
-			5,
-			greeting,
-			_tcslen(greeting));
-		EndPaint(hWnd, &ps);
+	case WM_LBUTTONDOWN:	// マウスの左ボタンが押されたときに送られてくる
+		MessageBox(hWnd, _T("左ボタンが押されました"), _T("メッセージ"), MB_OK);
 		break;
-
+	case WM_RBUTTONDOWN:	//マウスの右ボタンが押されたときに送られてくる
+		MessageBox(hWnd, _T("右ボタンが押されました"), _T("メッセージ"), MB_OK);
+		break;
+	case WM_MBUTTONDOWN:	//マウスの中ボタンが押されたときに送られてくる
+		MessageBox(hWnd, _T("中ボタンが押されました"), _T("メッセージ"), MB_OK);
+		break;
 	case WM_CLOSE:	// ウィンドウが閉じられようとしたときに送られてくる
-
 		if (MessageBox(hWnd,
 			_T("本当に終了してもいいですか？"),
 			_T("確認"),
-			style) == IDYES) {
+			MB_YESNO) == IDYES) {
 			//Yesが押されたらアプリケーションを終了
 			DestroyWindow(hWnd);
 		}
 		break;
-
 	case WM_DESTROY:
 		PostQuitMessage(0);
-		return 0;
 		break;
+
 
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
