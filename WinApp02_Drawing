@@ -1,6 +1,6 @@
 /*---------------------------------------------
 
-赤い点を描画
+赤い線を描画
 
 -----------------------------------------------*/
 
@@ -98,11 +98,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 
 	switch (message) {
 	case WM_PAINT:                      //描画時に呼び出し
-		hDC = BeginPaint(hWnd, &ps);			// GDI関数による描画を開始する
-		SetPixelV(hDC, 100, 100, RGB(255, 0, 0));	// (100,100)地点に赤い点を描画、小さいので注意
-		EndPaint(hWnd, &ps);					// GDI関数による描画を終了する
+		hDC = BeginPaint(hWnd, &ps);	// GDI関数による描画を開始する
+		MoveToEx(hDC, 100, 100, NULL);	// 始点を設定する
+		LineTo(hDC, 200, 200);			// 直線を描く
+		EndPaint(hWnd, &ps);			// GDI関数による描画を終了する
 		break;
-  case WM_CLOSE:	// ウィンドウが閉じられようとしたときに送られてくる
+	case WM_CLOSE:	// ウィンドウが閉じられようとしたときに送られてくる
 		if (MessageBox(hWnd,
 			_T("本当に終了してもいいですか？"),
 			_T("確認"),
