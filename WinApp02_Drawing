@@ -1,6 +1,6 @@
 /*---------------------------------------------
 
-赤い線を描画
+四角形を描画する
 
 -----------------------------------------------*/
 
@@ -11,8 +11,8 @@
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 // 大域変数
-static TCHAR szWindowClass[] = _T("Win32AP014");
-static TCHAR szTitle[] = _T("Win32AP014");
+static TCHAR szWindowClass[] = _T("Win32AP016");
+static TCHAR szTitle[] = _T("Win32AP016");
 HINSTANCE	hInst;
 
 int WINAPI WinMain(HINSTANCE hInstance,
@@ -37,10 +37,10 @@ int WINAPI WinMain(HINSTANCE hInstance,
 		0,
 		LR_DEFAULTSIZE | LR_SHARED
 		);
-	wcex.hIconSm = wcex.hIcon;				// 子アイコン
+	wcex.hIconSm = wcex.hIcon;							// 子アイコン
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-	wcex.lpszMenuName = NULL;				// メニュー名
+	wcex.lpszMenuName = NULL;							// メニュー名
 	wcex.lpszClassName = szWindowClass;
 	wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_APPLICATION));
 
@@ -97,21 +97,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 	PAINTSTRUCT ps;
 
 	switch (message) {
-	case WM_PAINT:                      //描画時に呼び出し
-		hDC = BeginPaint(hWnd, &ps);	// GDI関数による描画を開始する
-		MoveToEx(hDC, 100, 100, NULL);	// 始点を設定する
-		LineTo(hDC, 200, 200);			// 直線を描く
-		EndPaint(hWnd, &ps);			// GDI関数による描画を終了する
+	case WM_PAINT:
+		hDC = BeginPaint(hWnd, &ps);		// GDI関数による描画を開始する
+		Rectangle(hDC, 10, 70, 295, 114);		// 四角形を描画する
+		EndPaint(hWnd, &ps);				// GDI関数による描画を終了する
 		break;
-	case WM_CLOSE:	// ウィンドウが閉じられようとしたときに送られてくる
-		if (MessageBox(hWnd,
-			_T("本当に終了してもいいですか？"),
-			_T("確認"),
-			MB_YESNO) == IDYES) {
-			//Yesが押されたらアプリケーションを終了
-			DestroyWindow(hWnd);
-		}
-		break;
+
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
