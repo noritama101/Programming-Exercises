@@ -1,6 +1,6 @@
 /*---------------------------------------------
 
-右上の×ボタンを押すと、メッセージボックスで終了確認する
+右上の×ボタンを押すと、メッセージボックスで確認する
 
 -----------------------------------------------*/
 
@@ -96,6 +96,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 	PAINTSTRUCT	ps;
 	HDC			hdc;
 	TCHAR		greeting[] = _T("Hello, World!");
+	int style = MB_YESNO;	//メッセージボックスのスタイル
 
 	switch (message) {
 	case WM_PAINT:
@@ -109,10 +110,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		break;
 
 	case WM_CLOSE:	// ウィンドウが閉じられようとしたときに送られてくる
+
 		if (MessageBox(hWnd,
 			_T("本当に終了してもいいですか？"),
 			_T("確認"),
-			MB_YESNO) == IDYES) {
+			style) == IDYES) {
 			//Yesが押されたらアプリケーションを終了
 			DestroyWindow(hWnd);
 		}
