@@ -1,0 +1,218 @@
+//課題
+/*---------------------------------------------
+Win32AP016.cpp
+-----------------------------------------------*/
+
+#include <windows.h>
+#include <tchar.h>
+
+// プロトタイプ宣言
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+
+// 大域変数
+static TCHAR szWindowClass[] = _T("Win32AP016");
+static TCHAR szTitle[] = _T("Win32AP016");
+HINSTANCE	hInst;
+
+int WINAPI WinMain(HINSTANCE hInstance,
+	HINSTANCE hPrevInstance,
+	LPSTR pCmdLine,
+	int nCmdShow) {
+
+	WNDCLASSEX wcex;
+
+	// ウィンドウクラスの情報を設定
+	wcex.cbSize = sizeof(WNDCLASSEX);				// 構造体サイズ
+	wcex.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;	// スタイル
+	wcex.lpfnWndProc = WndProc;							// ウィンドウプロシージャ
+	wcex.cbClsExtra = 0;									// 拡張情報１
+	wcex.cbWndExtra = 0;									// 拡張情報２
+	wcex.hInstance = hInstance;							// インスタンスハンドル
+	wcex.hIcon = (HICON)LoadImage(					// アイコン
+		NULL,
+		MAKEINTRESOURCE(IDI_APPLICATION),
+		IMAGE_ICON,
+		0,
+		0,
+		LR_DEFAULTSIZE | LR_SHARED
+		);
+	wcex.hIconSm = wcex.hIcon;							// 子アイコン
+	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
+	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+	wcex.lpszMenuName = NULL;							// メニュー名
+	wcex.lpszClassName = szWindowClass;
+	wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_APPLICATION));
+
+	// ウィンドウクラスを登録する
+	if (!RegisterClassEx(&wcex)) {
+		MessageBox(NULL,
+			_T("ウィンドウの登録に失敗しました"),
+			_T("ウィンドウの登録エラー"),
+			NULL);
+		return 1;
+	}
+
+	hInst = hInstance; // インスタンス･ハンドルを大域変数に格納
+
+	// ウィンドウを作成する
+	HWND hWnd = CreateWindow(
+		szWindowClass,					// ウィンドウクラス名
+		szTitle,							// タイトルバーに表示する文字列
+		WS_OVERLAPPEDWINDOW,		// ウィンドウの種類
+		100,								// ウィンドウを表示する位置(X座標)
+		100,								// ウィンドウを表示する位置(Y座標)
+		320,								// ウィンドウの幅
+		568,								// ウィンドウの高さ
+		NULL,							// 親ウィンドウのウィンドウハンドル
+		NULL,							// メニューハンドル
+		hInst,							// インスタンスハンドル
+		NULL							// その他の作成データ
+		);
+
+	if (!hWnd) {
+		MessageBox(NULL,
+			_T("ウィンドウの作成に失敗しました"),
+			_T("ウィンドウの作成エラー"),
+			NULL);
+		return 1;
+	}
+
+	// ウィンドウを表示する
+	ShowWindow(hWnd, nCmdShow);
+	UpdateWindow(hWnd);
+
+	// メッセージ･ループ
+	MSG msg;
+	while (GetMessage(&msg, NULL, 0, 0)) {
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+	return (int)msg.wParam;
+}
+
+//矩形と文字列を表示する代行関数
+void DrawTextAndRect(HDC hDC,HDC hCompatDC, int offsetSX, int offsetSY,LPCTSTR text){
+	RECT	rc;	
+	SetRect(&rc,
+		10 + offsetSX,
+		70 + offsetSY,
+		295 + offsetSX,
+		114 + offsetSY);
+	Rectangle(hDC, rc.left, rc.top, rc.right, rc.bottom);
+	// ビットマップを２倍に拡大して、ウィンドウに転送する(表示する)
+	StretchBlt(hDC, rc.left+1, rc.top+1, 114-70-2, 114-70-2, hCompatDC, 0, 0, 64, 64, SRCCOPY);
+
+	int offsetX = 12;
+	int offsetY = 50;
+
+	SetRect(&rc,
+		10 + offsetSX + offsetY,
+		70 + offsetSY+offsetX,
+		295 + offsetSX + offsetY,
+		114 + offsetSY+offsetX);
+
+	//SetBkColor(hDC, RGB(128, 128, 255));
+	DrawText(hDC, text, -1, &rc, DT_LEFT);
+}
+//画像表示用構造体
+typedef struct texture {
+	HBITMAP bitmap,hPrevBitmap;
+	HDC hCompatDC;
+}TEXTURE;
+//テクスチャ初期化関数
+int initTexture(LPCWSTR fileName,HDC hDC,TEXTURE* tex){
+	tex->bitmap = (HBITMAP)LoadImage(
+		NULL,
+		fileName,
+		IMAGE_BITMAP,
+		0,
+		0,
+		LR_LOADFROMFILE);
+	if (tex->bitmap == NULL) {
+		return -1;
+	}
+	// メモリデバイスコンテキストを作成する
+	tex->hCompatDC = CreateCompatibleDC(hDC);
+	// ロードしたビットマップを選択する
+	tex->hPrevBitmap = (HBITMAP)SelectObject(tex->hCompatDC, tex->bitmap);
+	return 0;
+}
+
+// ウィンドウプロシージャ
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
+	
+	static LPCTSTR TEST_STR = _T("左ボタンが押されました");
+	static TEXTURE background,icon;
+	PAINTSTRUCT ps;
+	HBRUSH	hBrush;
+	RECT	rc;
+	static HDC hDC;
+	int i;
+	int upper = 70;
+	int lower = 114;
+
+	hDC = GetDC(hWnd);
+	switch (message) {
+	case WM_CREATE:
+		if (initTexture(_T("duke.bmp"), hDC, &icon) == -1){
+			MessageBox(
+				hWnd,
+				_T("ビットマップのロードに失敗しました"),
+				_T("エラー"),
+				MB_OK | MB_ICONWARNING
+				);
+		};
+		if (initTexture(_T("background.bmp"), hDC, &background) == -1){
+			MessageBox(
+				hWnd,
+				_T("ビットマップのロードに失敗しました"),
+				_T("エラー"),
+				MB_OK | MB_ICONWARNING
+				);
+		};
+		break;
+
+	case WM_PAINT:
+		hDC = BeginPaint(hWnd, &ps);		// GDI関数による描画を開始する
+		
+		GetClientRect(hWnd, &rc);
+		//べた塗りブラシの作成
+		hBrush = CreateSolidBrush(RGB(192, 192, 255));
+		SelectObject(hDC, hBrush);
+		//背景の描画
+		Rectangle(hDC, rc.left, rc.top, rc.right, rc.bottom);
+		//ブラシの開放
+		DeleteObject(hBrush);
+
+		//背景画像の描画
+		BitBlt(hDC, 0, 0, 320, 598, background.hCompatDC, 0, 0, SRCCOPY);
+
+		//べた塗りブラシの作成
+		hBrush = CreateSolidBrush(RGB(255, 255, 255));
+		SelectObject(hDC, hBrush);
+		for (i = 0; i < 8; i++) {
+			DrawTextAndRect(hDC, icon.hCompatDC, 0, 46 * i, L"テストだよっ");
+		}
+		ReleaseDC(hWnd, hDC);
+
+		DeleteObject(hBrush);
+		EndPaint(hWnd, &ps);			// GDI関数による描画を終了する
+		break;
+	case WM_MOUSEMOVE:
+		break;
+	case WM_MOUSEWHEEL:
+		OutputDebugString(_T("ホイール!!\n"));
+
+		break;
+
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		break;
+
+	default:
+		return DefWindowProc(hWnd, message, wParam, lParam);
+		break;
+	}
+	return 0;
+}
+
