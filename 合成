@@ -1,0 +1,71 @@
+RGB = imread('Koala.jpg');
+RGB1 = imread('Jellyfish.jpg');
+
+image(RGB1);
+
+pause;
+
+image(RGB2);
+
+pause;
+[sx,sy,sz]=size(RGB);
+
+OUT= cast(zeros(sx,sy,sz),'uint8');
+
+
+%%加算合成
+
+% for y = 1:sy
+%    for x = 1:sx
+%        OUT(x,y,1) = cast((RGB1(x,y,1) + RGB1(x,y,1)),'uint8');
+%        OUT(x,y,2) = cast((RGB1(x,y,2) + RGB1(x,y,2)),'uint8');
+%        OUT(x,y,3) = cast((RGB1(x,y,3) + RGB1(x,y,3)),'uint8');
+%    end
+% end
+
+%%減算合成
+% for y = 1:sy
+%    for x = 1:sx
+%        OUT(x,y,1) = cast((RGB1(x,y,1) - RGB2(x,y,1)),'uint8');
+%        OUT(x,y,2) = cast((RGB1(x,y,2) - RGB2(x,y,2)),'uint8');
+%        OUT(x,y,3) = cast((RGB1(x,y,3) - RGB2(x,y,3)),'uint8');
+%    end
+% end
+
+%%乗算合成
+% for y = 1:sy
+%    for x = 1:sx
+%        OUT(x,y,1) = cast((RGB1(x,y,1) * RGB2(x,y,1)),'uint8');
+%        OUT(x,y,2) = cast((RGB1(x,y,2) * RGB2(x,y,2)),'uint8');
+%        OUT(x,y,3) = cast((RGB1(x,y,3) * RGB2(x,y,3)),'uint8');
+%    end
+% end
+
+%%除算合成
+% for y = 1:sy
+%    for x = 1:sx
+%        OUT(x,y,1) = cast((RGB1(x,y,1) / RGB2(x,y,1)),'uint8');
+%        OUT(x,y,2) = cast((RGB1(x,y,2) / RGB2(x,y,2)),'uint8');
+%        OUT(x,y,3) = cast((RGB1(x,y,3) / RGB2(x,y,3)),'uint8');
+%    end
+% end
+
+%%剰余合成
+% for y = 1:sy
+%    for x = 1:sx
+%        for z = 1:sz
+%             OUT(x,y,sz) = cast(rem(RGB1(x,y,sz),RGB2(x,y,sz)),'uint8');
+%        end
+%    end
+% end
+
+%%反転
+for y = 1:sy
+   for x = 1:sx
+       OUT(x,y,1) = cast(RGB1(x,y,3),'uint8');
+       OUT(x,y,2) = cast(RGB1(x,y,2),'uint8');
+       OUT(x,y,3) = cast(RGB1(x,y,1),'uint8');
+   end
+end
+
+image(OUT);
